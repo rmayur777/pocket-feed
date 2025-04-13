@@ -1,0 +1,24 @@
+name: Update Pocket Feed
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # Every day at 6 AM UTC
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Download latest Pocket RSS XML
+        run: curl -L "https://pocket-rss.com/feed/b4609c7e4f28281ceb801e4583da4c5d" -o feed.xml
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add feed.xml
+          git diff --cached --quiet || git commit -m "Update feed"
+          git push
